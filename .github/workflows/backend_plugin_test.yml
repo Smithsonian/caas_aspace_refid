@@ -55,4 +55,4 @@ jobs:
 
     - name: Run Backend plugin tests
       run: |
-        ./build/run backend:test -Dspec="../../plugins/${{ github.event.repository.name }}"
+        ./build/run backend:test -Dspec="../../plugins/${{ github.event.repository.name }}/backend"

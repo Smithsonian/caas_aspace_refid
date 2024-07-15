@@ -21,3 +21,10 @@ ArchivalObject.auto_generate(property: :ref_id,
                                "#{resource['ead_id']}_ref#{generate_ref_id(resource['id'])}"
                              end,
                              only_on_create: true)
+
+ArchivalObject.auto_generate(property: :ref_id,
+                             generator: proc do |json|
+                               resource = Resource.to_jsonmodel(JSONModel::JSONModel(:resource).id_for(json['resource']['ref']))
+                               "#{resource['ead_id']}_ref#{generate_ref_id(resource['id'])}"
+                             end,
+                             only_if: proc { |json| json['caas_regenerate_ref_id'] })
