@@ -42,9 +42,13 @@
         <%= render_aspace_partial :partial => "shared/slug", :locals => {:form => form, :record_type => @archival_object} if AppConfig[:use_human_readable_urls] %>
 
         <%= form.hidden_input "ref_id" %>
+
+        <%# Refid plugin start %>
         <% if user_can?('administer_system') %>
             <%= form.label_and_boolean "caas_regenerate_ref_id" %>
         <% end %>
+        <%# Refid plugin end %>
+
         <%= form.label_and_textfield("component_id")%>
         <%= form.label_and_textfield "external_ark_url" if AppConfig[:arks_enabled] && AppConfig[:arks_allow_external_arks] %>
         <%= form.label_and_select "level", form.possible_options_for("level", true) %>
