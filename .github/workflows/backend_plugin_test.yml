@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROD_ARCHIVESSPACE_VERSION: v3.3.1
+      REFID_SEED_FILE: 'example.csv'
 
     services:
       db:
