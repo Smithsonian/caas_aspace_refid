@@ -24,12 +24,12 @@ describe 'CAAS ref id plugin' do
     end
   end
 
-  describe 'GET /plugins/caas_next_refid/resources/:rid' do
-    context 'when a bad resource_id is provided' do
-      let(:rid) { rand(100) }
+  describe 'GET /plugins/caas_next_refid/find_by_uri' do
+    context 'when a bad resource_uri is provided' do
+      let(:resource_uri) { "/repositories/2/resources/#{rand(100)}" }
 
       it 'throws an error' do
-        get "/plugins/caas_next_refid/resources/#{rid}"
+        get "/plugins/caas_next_refid/find_by_uri?resource_uri=#{resource_uri}"
 
         expect(last_response).not_to be_ok
         expect(last_response.status).to eq(404)
@@ -37,15 +37,15 @@ describe 'CAAS ref id plugin' do
       end
     end
 
-    context 'when an existing resource_id is provided' do
+    context 'when an existing resource_uri is provided' do
       let(:resource) { create_resource }
 
       before do
-        post '/plugins/caas_next_refid', params = { 'resource_id' => resource.id}
+        post '/plugins/caas_next_refid', params = { resource_id: resource.id}
       end
 
       it 'returns the next_refid' do
-        get "/plugins/caas_next_refid/resources/#{resource.id}"
+        get '/plugins/caas_next_refid/find_by_uri', params = { resource_uri: resource.uri }
 
         expect(last_response).to be_ok
         expect(last_response.status).to eq(200)
@@ -60,7 +60,7 @@ describe 'CAAS ref id plugin' do
 
         it 'denies access' do
           as_test_user('archivist') do
-            get "/plugins/caas_next_refid/resources/#{resource.id}"
+            get '/plugins/caas_next_refid/find_by_uri', params = { resource_uri: resource.uri }
 
             expect(last_response).not_to be_ok
             expect(last_response.status).to eq(403)
@@ -72,12 +72,13 @@ describe 'CAAS ref id plugin' do
     end
   end
 
-  describe 'POST /plugins/caas_next_refid/resources/:rid' do
-    context 'when a bad resource_id is provided' do
-      let(:rid) { rand(100) }
+  describe 'POST /plugins/caas_next_refid/set_by_uri' do
+    context 'when a bad resource_uri is provided' do
+      let(:resource_uri) { "/repositories/2/resources/#{rand(100)}" }
 
       it 'throws an error' do
-        post "/plugins/caas_next_refid/resources/#{rid}", params = { 'next_refid' => 300}
+        post '/plugins/caas_next_refid/set_by_uri', params = { resource_uri: resource_uri,
+                                                               next_refid: 300 }
 
         expect(last_response).not_to be_ok
         expect(last_response.status).to eq(400)
@@ -85,15 +86,16 @@ describe 'CAAS ref id plugin' do
       end
     end
 
-    context 'when an existing resource_id is provided' do
+    context 'when an existing resource_uri is provided' do
       let(:resource) { create_resource }
 
       before do
-        post '/plugins/caas_next_refid/', params = { 'resource_id' => resource.id}
+        post '/plugins/caas_next_refid/set_by_uri', params = { resource_uri: resource.uri}
       end
 
       it 'updates the next_refid to the provided value' do
-        post "/plugins/caas_next_refid/resources/#{resource.id}", params = { 'next_refid' => 300}
+        post "/plugins/caas_next_refid/set_by_uri", params = { resource_uri: resource.uri,
+                                                               next_refid: 300}
 
         expect(last_response).to be_ok
         expect(last_response.status).to eq(200)
@@ -108,7 +110,8 @@ describe 'CAAS ref id plugin' do
         end
 
         it 'throws an error' do
-          post "/plugins/caas_next_refid/resources/#{resource.id}", params = { 'next_refid' => 1 }
+          post "/plugins/caas_next_refid/set_by_uri", params = { resource_uri: resource.uri,
+                                                                 next_refid: 1 }
 
           expect(last_response).not_to be_ok
           expect(last_response.status).to eq(400)
@@ -123,7 +126,8 @@ describe 'CAAS ref id plugin' do
 
         it 'denies access' do
           as_test_user('archivist') do
-            post "/plugins/caas_next_refid/resources/#{resource.id}", params = { 'next_refid' => 300}
+            post '/plugins/caas_next_refid/set_by_uri', params = { resource_uri: resource.uri,
+                                                                   next_refid: 300}
 
             expect(last_response).not_to be_ok
             expect(last_response.status).to eq(403)
