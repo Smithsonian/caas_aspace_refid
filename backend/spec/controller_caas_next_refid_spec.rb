@@ -24,12 +24,12 @@ describe 'CAAS ref id plugin' do
     end
   end
 
-  describe 'GET /plugins/caas_next_refid/:rid' do
+  describe 'GET /plugins/caas_next_refid/resources/:rid' do
     context 'when a bad resource_id is provided' do
       let(:rid) { rand(100) }
 
       it 'throws an error' do
-        get "/plugins/caas_next_refid/#{rid}"
+        get "/plugins/caas_next_refid/resources/#{rid}"
 
         expect(last_response).not_to be_ok
         expect(last_response.status).to eq(404)
@@ -45,7 +45,7 @@ describe 'CAAS ref id plugin' do
       end
 
       it 'returns the next_refid' do
-        get "/plugins/caas_next_refid/#{resource.id}"
+        get "/plugins/caas_next_refid/resources/#{resource.id}"
 
         expect(last_response).to be_ok
         expect(last_response.status).to eq(200)
@@ -60,7 +60,7 @@ describe 'CAAS ref id plugin' do
 
         it 'denies access' do
           as_test_user('archivist') do
-            get "/plugins/caas_next_refid/#{resource.id}"
+            get "/plugins/caas_next_refid/resources/#{resource.id}"
 
             expect(last_response).not_to be_ok
             expect(last_response.status).to eq(403)
@@ -72,12 +72,12 @@ describe 'CAAS ref id plugin' do
     end
   end
 
-  describe 'POST /plugins/caas_next_refid/:rid' do
+  describe 'POST /plugins/caas_next_refid/resources/:rid' do
     context 'when a bad resource_id is provided' do
       let(:rid) { rand(100) }
 
       it 'throws an error' do
-        post "/plugins/caas_next_refid/#{rid}", params = { 'next_refid' => 300}
+        post "/plugins/caas_next_refid/resources/#{rid}", params = { 'next_refid' => 300}
 
         expect(last_response).not_to be_ok
         expect(last_response.status).to eq(400)
@@ -93,7 +93,7 @@ describe 'CAAS ref id plugin' do
       end
 
       it 'updates the next_refid to the provided value' do
-        post "/plugins/caas_next_refid/#{resource.id}", params = { 'next_refid' => 300}
+        post "/plugins/caas_next_refid/resources/#{resource.id}", params = { 'next_refid' => 300}
 
         expect(last_response).to be_ok
         expect(last_response.status).to eq(200)
@@ -108,7 +108,7 @@ describe 'CAAS ref id plugin' do
         end
 
         it 'throws an error' do
-          post "/plugins/caas_next_refid/#{resource.id}", params = { 'next_refid' => 1 }
+          post "/plugins/caas_next_refid/resources/#{resource.id}", params = { 'next_refid' => 1 }
 
           expect(last_response).not_to be_ok
           expect(last_response.status).to eq(400)
@@ -123,7 +123,7 @@ describe 'CAAS ref id plugin' do
 
         it 'denies access' do
           as_test_user('archivist') do
-            post "/plugins/caas_next_refid/#{resource.id}", params = { 'next_refid' => 300}
+            post "/plugins/caas_next_refid/resources/#{resource.id}", params = { 'next_refid' => 300}
 
             expect(last_response).not_to be_ok
             expect(last_response.status).to eq(403)

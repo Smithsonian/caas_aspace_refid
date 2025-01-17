@@ -20,7 +20,7 @@ class ArchivesSpaceService < Sinatra::Base
     json_response(:resource_id => params[:resource_id], :next_refid => incremented_id)
   end
 
-  Endpoint.get('/plugins/caas_next_refid/:resource_id')
+  Endpoint.get('/plugins/caas_next_refid/resources/:resource_id')
     .description("Get the next_refid for a specific resource")
     .params(["resource_id", Integer, :resource_id, :required => "true"])
     .permissions([:administer_system])
@@ -37,7 +37,7 @@ class ArchivesSpaceService < Sinatra::Base
     end
   end
 
-  Endpoint.post('/plugins/caas_next_refid/:resource_id')
+  Endpoint.post('/plugins/caas_next_refid/resources/:resource_id')
     .description("Manually set next ref_id for provided resource")
     .params(["resource_id", Integer, :resource_id, :required => "true"],
             ["next_refid", Integer, :next_refid, :required => "true"])
