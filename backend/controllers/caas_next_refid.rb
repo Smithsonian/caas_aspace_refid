@@ -3,7 +3,7 @@ class ArchivesSpaceService < Sinatra::Base
   Endpoint.post('/plugins/caas_next_refid')
     .description("Get next ref_id for provided resource")
     .params(["resource_id", Integer, "The resource id", :required => "true"])
-    .permissions([])
+    .permissions([:administer_system])
     .returns([200, "{'resource_id', 'ID', 'next_refid', N}"]) \
   do
     existing_refid_record = CaasAspaceRefid.find(resource_id: params[:resource_id])
