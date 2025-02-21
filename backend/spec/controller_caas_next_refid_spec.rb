@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe 'CAAS ref id plugin' do
   describe 'POST /plugins/caas_next_refid' do
-    context 'when no resource_id is provided' do
+    context 'when no resource_id or repo_id is provided' do
       it 'throws an error' do
         post '/plugins/caas_next_refid', params = { }
 
@@ -12,12 +12,13 @@ describe 'CAAS ref id plugin' do
       end
     end
 
-    context 'when a resource_id is provided' do
+    context 'when a resource_id and repo_id is provided' do
       let(:resource) { create_resource }
 
       context 'when no caas_next_refid exists' do
         it 'creates a next_refid with a starting increment of 2' do
-          post '/plugins/caas_next_refid', params = { "resource_id" => resource.id}
+          post '/plugins/caas_next_refid', params = { resource_id: resource.id,
+                                                      repo_id: $repo_id }
 
           expect(last_response).to be_ok
           expect(last_response.status).to eq(200)
@@ -36,7 +37,8 @@ describe 'CAAS ref id plugin' do
         end
 
         it 'updates the next_refid by 1' do
-          post '/plugins/caas_next_refid', params = { "resource_id" => resource.id}
+          post '/plugins/caas_next_refid', params = { resource_id: resource.id,
+                                                      repo_id: $repo_id }
 
           expect(last_response).to be_ok
           expect(last_response.status).to eq(200)
@@ -51,7 +53,7 @@ describe 'CAAS ref id plugin' do
       let(:resource_uri) { "/repositories/2/resources/#{rand(100)}" }
 
       it 'throws an error' do
-        get "/plugins/caas_next_refid/find_by_uri?resource_uri=#{resource_uri}"
+        get '/plugins/caas_next_refid/find_by_uri', params = { resource_uri: resource_uri }
 
         expect(last_response).not_to be_ok
         expect(last_response.status).to eq(404)
@@ -63,7 +65,7 @@ describe 'CAAS ref id plugin' do
       let(:resource) { create_resource }
 
       before do
-        post '/plugins/caas_next_refid', params = { resource_id: resource.id}
+        post '/plugins/caas_next_refid', params = { resource_id: resource.id, repo_id: $repo_id }
       end
 
       it 'returns the next_refid' do
@@ -112,12 +114,12 @@ describe 'CAAS ref id plugin' do
       let(:resource) { create_resource }
 
       before do
-        post '/plugins/caas_next_refid/set_by_uri', params = { resource_uri: resource.uri}
+        post '/plugins/caas_next_refid/set_by_uri', params = { resource_uri: resource.uri }
       end
 
       it 'updates the next_refid to the provided value' do
-        post "/plugins/caas_next_refid/set_by_uri", params = { resource_uri: resource.uri,
-                                                               next_refid: 300}
+        post '/plugins/caas_next_refid/set_by_uri', params = { resource_uri: resource.uri,
+                                                               next_refid: 300 }
 
         expect(last_response).to be_ok
         expect(last_response.status).to eq(200)
@@ -132,7 +134,7 @@ describe 'CAAS ref id plugin' do
         end
 
         it 'throws an error' do
-          post "/plugins/caas_next_refid/set_by_uri", params = { resource_uri: resource.uri,
+          post '/plugins/caas_next_refid/set_by_uri', params = { resource_uri: resource.uri,
                                                                  next_refid: 1 }
 
           expect(last_response).not_to be_ok

@@ -2,10 +2,16 @@ class ArchivesSpaceService < Sinatra::Base
 
   Endpoint.post('/plugins/caas_next_refid')
     .description("Get next ref_id for provided resource")
-    .params(["resource_id", Integer, "The resource id", :required => "true"])
+    .params(["resource_id", Integer, "The resource id", :required => "true"],
+            ["repo_id", Integer, "The repository id", :required => "true"])
     .permissions([])
-    .returns([200, "{'resource_id', 'ID', 'next_refid', N}"]) \
+    .returns([200, "(:caas_aspace_refid)"],
+             [400, :error]) \
   do
+    RequestContext.open(:repo_id => params[:repo_id]) do
+      raise NotFoundException.new unless Resource.get_or_die(params[:resource_id])
+    end
+
     existing_refid_record = CaasAspaceRefid.find(resource_id: params[:resource_id])
     if existing_refid_record
       incremented_refid = (existing_refid_record&.next_refid || 0) + 1

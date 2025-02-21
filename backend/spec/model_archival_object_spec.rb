@@ -18,7 +18,7 @@ describe 'ArchivalObject model' do
 
     describe '#generate_ref_id' do
       it 'returns a value one less than the next_refid' do
-        expect(generate_ref_id(resource_json)).to eq(40)
+        expect(generate_ref_id(resource_json, $repo_id)).to eq(40)
       end
     end
 
@@ -71,7 +71,7 @@ describe 'ArchivalObject model' do
 
     describe '#generate_ref_id' do
       it 'returns a unique date string' do
-         expect(generate_ref_id(resource_json)).to start_with(refid_fallback)
+         expect(generate_ref_id(resource_json, $repo_id)).to start_with(refid_fallback)
        end
     end
 
@@ -109,6 +109,20 @@ describe 'ArchivalObject model' do
           expect(archival_object.ref_id).to start_with("my.eadid_ref#{refid_fallback}")
         end
       end
+    end
+  end
+
+  context 'when the resource does not exist yet' do
+    let(:refid_fallback) { DateTime.now.strftime('%s')[0..-2] }
+
+    before do
+      allow(Net::HTTP).to receive(:start).and_call_original
+    end
+
+    describe '#generate_ref_id' do
+      it 'returns a unique date string' do
+         expect(generate_ref_id(nil, $repo_id)).to start_with(refid_fallback)
+       end
     end
   end
 end
