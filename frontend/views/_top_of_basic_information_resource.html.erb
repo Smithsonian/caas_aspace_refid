@@ -1,0 +1,4 @@
+<% if @resource.caas_next_refid %>
+    <%= form.hidden_input "caas_next_refid[resource_id]", @resource.caas_next_refid['resource_id'] %>
+    <%= form.hidden_input "caas_next_refid[next_refid]", @resource.caas_next_refid['next_refid'] %>
+<% end %>
