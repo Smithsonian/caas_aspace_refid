@@ -1,0 +1,29 @@
+name: Build and deploy API docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build docs
+        run: |
+          npx @redocly/cli build-docs docs/openapi.yml -o index.html
+
+      - name: Deploy to GitHub Pages
+        if: github.event.repository.fork == false
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          force_orphan: true
+          exclude_assets: '.github,backend,frontend,migrations,schemas,.rubocop.yml'
