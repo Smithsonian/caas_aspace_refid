@@ -23,6 +23,13 @@ paths:
           required: true
           schema:
             type: integer
+        - name: repo_id
+          in: query
+          description: The ID of the archival object's repository
+          example: 2
+          required: true
+          schema:
+            type: integer
       security:
         - auth: []
       responses:

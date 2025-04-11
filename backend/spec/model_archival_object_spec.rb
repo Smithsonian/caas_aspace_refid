@@ -40,23 +40,44 @@ describe 'ArchivalObject model' do
         end
       end
 
-      context 'when an existing archival object is updated with caas_regenerate_ref_id set to true' do
+      context 'when an archival object exists' do
         let(:archival_object) do
-          create_archival_object({ ref_id: '123',
-                                    caas_regenerate_ref_id: true,
-                                    resource: { ref: "/repositories/2/resources/#{resource.id}" } })
+          create_archival_object({ resource: { ref: "/repositories/2/resources/#{resource.id}" } })
+        end
+        let(:ao_json) { ArchivalObject.to_jsonmodel(archival_object.id) }
+
+        context 'when that archival object is updated with caas_regenerate_ref_id set to true' do
+          let(:updated_ao) do
+            ao_json['caas_regenerate_ref_id'] = true
+            archival_object.update_from_json(ao_json)
+          end
+
+          it 'calls the caas_next_refid endpoint' do
+            updated_ao
+
+            expect(Net::HTTP).to have_received(:start)
+          end
+
+          it 'auto generates ref_id' do
+            expect(updated_ao.ref_id).to eq('my.eadid_ref40')
+          end
         end
 
-        it 'calls the caas_next_refid endpoint' do
-          archival_object
+        context 'when that archival object is updated with caas_regenerate_ref_id set to false' do
+          let(:updated_ao) do
+            ao_json['caas_regenerate_ref_id'] = false
+            archival_object.update_from_json(ao_json)
+          end
 
-          expect(Net::HTTP).to have_received(:start)
-        end
+          it 'does not call the caas_next_refid endpoint' do
+            updated_ao
 
-        it 'auto generates ref_id' do
-          archival_object.save
+            expect(Net::HTTP).not_to have_received(:start)
+          end
 
-          expect(archival_object.ref_id).to eq('my.eadid_ref40')
+          it 'retains the previous ref_id' do
+            expect(updated_ao.ref_id).to eq(ao_json['ref_id'])
+          end
         end
       end
     end
@@ -93,36 +114,46 @@ describe 'ArchivalObject model' do
         end
       end
 
-      context 'when an existing archival object is updated with caas_regenerate_ref_id set to true' do
+      context 'when an archival object exists' do
         let(:archival_object) do
-          create_archival_object({ caas_regenerate_ref_id: true,
-                                   resource: { ref: "/repositories/2/resources/#{resource.id}" } })
+          create_archival_object({ resource: { ref: "/repositories/2/resources/#{resource.id}" } })
+        end
+        let(:ao_json) { ArchivalObject.to_jsonmodel(archival_object.id) }
+
+        context 'when that archival object is updated with caas_regenerate_ref_id set to true' do
+          let(:updated_ao) do
+            ao_json['caas_regenerate_ref_id'] = true
+            archival_object.update_from_json(ao_json)
+          end
+
+          it 'calls the caas_next_refid endpoint' do
+            updated_ao
+
+            expect(Net::HTTP).to have_received(:start)
+          end
+
+          it 'auto generates ref_id' do
+            expect(updated_ao.ref_id).to start_with("my.eadid_ref#{refid_fallback}")
+          end
         end
 
-        it 'calls the caas_next_refid endpoint' do
-          archival_object
+        context 'when that archival object is updated with caas_regenerate_ref_id set to false' do
+          let(:updated_ao) do
+            ao_json['caas_regenerate_ref_id'] = false
+            archival_object.update_from_json(ao_json)
+          end
 
-          expect(Net::HTTP).to have_received(:start)
-        end
+          it 'does not call the caas_next_refid endpoint' do
+            updated_ao
 
-        it 'auto generates ref_id' do
-          expect(archival_object.ref_id).to start_with("my.eadid_ref#{refid_fallback}")
+            expect(Net::HTTP).not_to have_received(:start)
+          end
+
+          it 'retains the previous ref_id' do
+            expect(updated_ao.ref_id).to eq(ao_json['ref_id'])
+          end
         end
       end
-    end
-  end
-
-  context 'when the resource does not exist yet' do
-    let(:refid_fallback) { DateTime.now.strftime('%s')[0..-2] }
-
-    before do
-      allow(Net::HTTP).to receive(:start).and_call_original
-    end
-
-    describe '#generate_ref_id' do
-      it 'returns a unique date string' do
-         expect(generate_ref_id(nil, $repo_id)).to start_with(refid_fallback)
-       end
     end
   end
 end

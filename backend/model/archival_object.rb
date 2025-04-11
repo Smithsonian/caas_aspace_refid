@@ -18,16 +18,13 @@ rule_template = ERB.new("<%= resource['ead_id'] %>_ref<%= generate_ref_id(resour
 
 ArchivalObject.auto_generate(property: :ref_id,
                              generator: proc do |json|
-                               repo_id = RequestContext.get(:repo_id)
-                               resource = Resource.to_jsonmodel(JSONModel::JSONModel(:resource).id_for(json['resource']['ref']))
-                               rule_template.result(binding())
-                             end,
-                             only_on_create: true)
-
-ArchivalObject.auto_generate(property: :ref_id,
-                             generator: proc do |json|
-                               repo_id = RequestContext.get(:repo_id)
-                               resource = Resource.to_jsonmodel(JSONModel::JSONModel(:resource).id_for(json['resource']['ref']))
-                               rule_template.result(binding())
-                             end,
-                             only_if: proc { |json| json['caas_regenerate_ref_id'] })
+                               # handling for newly created aos and ao's with caas_regenerate_ref_id set to true
+                               if json['ref_id'].nil? || json['caas_regenerate_ref_id']
+                                 repo_id = RequestContext.get(:repo_id)
+                                 resource = Resource.to_jsonmodel(JSONModel::JSONModel(:resource).id_for(json['resource']['ref']))
+                                 rule_template.result(binding())
+                               # handling for caas_regenerate_ref_id set to false, including bulk update flow
+                               elsif json['caas_regenerate_ref_id'] === false
+                                 json[:ref_id] = ArchivalObject.to_jsonmodel(JSONModel::JSONModel(:archival_object).id_for(json['uri']))['ref_id']
+                               end
+                             end)
