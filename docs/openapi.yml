@@ -1,0 +1,138 @@
+openapi: 3.1.0
+info:
+  title: CAAS ASpace Refid Plugin API
+  version: '0.1'
+
+servers:
+  - url: http://localhost:4567
+    description: Locally running development instance of ArchivesSpace
+  - url: http://localhost:8089
+    description: Locally running build of ArchivesSpace
+
+paths:
+  /plugins/caas_next_refid:
+    post:
+      operationId: postNextRefid
+      summary: Mint the next ref_id for provided resource
+      description: _Note_ This is the endpoint hit by the Staff UI
+      parameters:
+        - name: resource_id
+          in: query
+          description: The ID of the current resource
+          example: 1
+          required: true
+          schema:
+            type: integer
+        - name: repo_id
+          in: query
+          description: The ID of the archival object's repository
+          example: 2
+          required: true
+          schema:
+            type: integer
+      security:
+        - auth: []
+      responses:
+        '200': # status code
+          description: A JSON response object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaasNextRefid'
+        '400':
+          description: Bad request
+  /plugins/caas_next_refid/find_by_uri:
+    get:
+      operationId: getRefid
+      summary: Get next ref_id for provided resource
+      parameters:
+        - name: resource_uri
+          in: query
+          description: The uri of the desired resource
+          example: '/repositories/2/resources/1'
+          required: true
+          schema:
+            type: string
+      security:
+        - auth: ['administer_system']
+      responses:
+        '200': # status code
+          description: A JSON response object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaasNextRefid'
+        '400':
+          description: Bad request
+  /plugins/caas_next_refid/set_by_uri:
+    post:
+      operationId: postRefid
+      summary: Manually set next ref_id for provided resource
+      parameters:
+        - name: resource_uri
+          in: query
+          description: The uri of the desired resource
+          example: '/repositories/2/resources/1'
+          required: true
+          schema:
+            type: string
+        - name: next_refid
+          in: query
+          description: The ID of the user-supplied next_refid.  Must be greater than the current next_refid.
+          example: 1001
+          required: true
+          schema:
+            type: integer
+      security:
+        - auth: ['administer_system']
+      responses:
+        '200': # status code
+          description: A JSON response object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaasNextRefid'
+        '400':
+          description: Bad request
+
+components:
+  schemas:
+    CaasNextRefid:
+      properties:
+        lock_version:
+          type: integer
+          format: int64
+          example: 0
+        resource_id:
+          type: integer
+          format: int64
+          example: 10
+        next_refid:
+          type: integer
+          format: int64
+          example: 198772
+        create_time:
+          type: string
+          format: date-time
+          example: '2025-04-03T16:44:34Z'
+        system_mtime:
+          type: string
+          format: date-time
+          example: '2025-04-03T16:44:34Z'
+        user_mtime:
+          type: string
+          format: date-time
+          example: '2025-04-03T16:44:34Z'
+        jsonmodel_type:
+          type: string
+        uri:
+          type: string
+          format: uri
+          example: '/plugins/caas_next_refid/1'
+      type: object
+  securitySchemes:
+    auth:
+      type: apiKey
+      in: header
+      name: X-ArchivesSpace-Session
+      x-apikeyInfoFunc: app.auth
