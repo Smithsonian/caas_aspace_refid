@@ -24,7 +24,10 @@ ArchivalObject.auto_generate(property: :ref_id,
                                  resource = Resource.to_jsonmodel(JSONModel::JSONModel(:resource).id_for(json['resource']['ref']))
                                  rule_template.result(binding())
                                # handling for caas_regenerate_ref_id set to false, including bulk update flow
-                               elsif json['caas_regenerate_ref_id'] === false
+                               elsif json['caas_regenerate_ref_id'] === false && json['uri']
                                  json[:ref_id] = ArchivalObject.to_jsonmodel(JSONModel::JSONModel(:archival_object).id_for(json['uri']))['ref_id']
+                               # handling for when we've got no other way to determine the ref_id (e.g. staff form)
+                               else
+                                 json[:ref_id] = json['ref_id']
                                end
                              end)
