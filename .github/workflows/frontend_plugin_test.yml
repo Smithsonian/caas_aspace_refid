@@ -13,6 +13,7 @@ jobs:
     env:
       REFID_SEED_FILE: 'example.csv'
       DB_PORT: '3307'
+      SOLR_ENABLED: true
     continue-on-error: true
     strategy:
       matrix:
@@ -43,11 +44,7 @@ jobs:
         archivesspace-version: ${{ matrix.archivesspace_version }}
         db-port: ${{ env.DB_PORT }}
         plugin: ${{ github.event.repository.name }}
-    
-    - uses: actions/setup-java@v4
-      with:
-        java-version: 11
-        distribution: temurin
+        solr-enabled: ${{ env.SOLR_ENABLED }}
 
     - name: Bootstrap ArchivesSpace
       uses: Smithsonian/caas-aspace-services/.github/actions/bootstrap@main
@@ -55,18 +52,6 @@ jobs:
         backend: 'true'
         frontend: 'true'
         indexer: 'true'
-
-    - name: Copy solr config from workspace to solr service
-      env:
-        SOLR_ID: ${{ job.services.solr.id }}
-      run: |
-        docker cp solr $SOLR_ID:/solr_conf_from_repo
-
-    - name: Create ArchivesSpace Solr core
-      env:
-        SOLR_ID: ${{ job.services.solr.id }}
-      run: |
-        docker exec --tty $SOLR_ID solr create_core -p 8983 -c archivesspace -d /solr_conf_from_repo
       
     - name: Setup firefox
       id: setup-firefox
