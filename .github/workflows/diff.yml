@@ -13,3 +13,5 @@ on:
 jobs:
   diff:
     uses: Smithsonian/caas-aspace-services/.github/workflows/diff.yml@main
+    with:
+      prod_archivesspace_version: v4.1.0
