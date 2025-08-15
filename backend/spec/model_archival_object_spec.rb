@@ -156,4 +156,37 @@ describe 'ArchivalObject model' do
       end
     end
   end
+
+  context 'when the resource record is being duplicated' do
+    let(:resource) { create_resource({ ead_id: '[Duplicated] my.eadid' }) }
+    let(:response) { instance_double(Net::HTTPResponse) }
+    let(:caas_next_refid) do
+      JSONModel(:caas_next_refid).from_hash({ resource_id: resource.id,
+                                              next_refid: 11 })
+    end
+
+    before do
+      allow(Net::HTTP).to receive(:start).and_return(response)
+      allow(response).to receive(:body).and_return(caas_next_refid.to_json)
+    end
+
+    describe '#auto_generate' do
+      context 'when the archival object is new' do
+        let(:archival_object) do
+          create_archival_object({ ref_id: nil,
+                                    resource: { ref: "/repositories/2/resources/#{resource.id}" } })
+        end
+
+        it 'calls the caas_next_refid endpoint' do
+          archival_object
+
+          expect(Net::HTTP).to have_received(:start)
+        end
+
+        it 'auto generates the ref_id with a cleaned ead_id' do
+          expect(archival_object.ref_id).to eq('Duplicatedmy.eadid_ref10')
+        end
+      end
+    end
+  end
 end
