@@ -23,7 +23,7 @@ ArchivalObject.auto_generate(property: :ref_id,
                                  repo_id = RequestContext.get(:repo_id)
                                  resource = Resource.to_jsonmodel(JSONModel::JSONModel(:resource).id_for(json['resource']['ref']))
                                  # Duplicate resource core function adds ref_id-illegal characters to the ead id that
-                                 # must be stripped out 
+                                 # must be stripped out
                                  cleaned_eadid = resource['ead_id'].delete('[]').gsub(/\s+/, '')
                                  rule_template.result(binding())
                                # handling for caas_regenerate_ref_id set to false, including bulk update flow
