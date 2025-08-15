@@ -14,7 +14,7 @@ def generate_ref_id(resource, repo_id)
   end
 end
 
-rule_template = ERB.new("<%= resource['ead_id'] %>_ref<%= generate_ref_id(resource, repo_id) %>")
+rule_template = ERB.new("<%= cleaned_eadid %>_ref<%= generate_ref_id(resource, repo_id) %>")
 
 ArchivalObject.auto_generate(property: :ref_id,
                              generator: proc do |json|
@@ -22,6 +22,9 @@ ArchivalObject.auto_generate(property: :ref_id,
                                if json['ref_id'].nil? || json['caas_regenerate_ref_id']
                                  repo_id = RequestContext.get(:repo_id)
                                  resource = Resource.to_jsonmodel(JSONModel::JSONModel(:resource).id_for(json['resource']['ref']))
+                                 # Duplicate resource core function adds ref_id-illegal characters to the ead id that
+                                 # must be stripped out 
+                                 cleaned_eadid = resource['ead_id'].delete('[]').gsub(/\s+/, '')
                                  rule_template.result(binding())
                                # handling for caas_regenerate_ref_id set to false, including bulk update flow
                                elsif json['caas_regenerate_ref_id'] === false && json['uri']
